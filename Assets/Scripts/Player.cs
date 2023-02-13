@@ -3,6 +3,7 @@ using UnityEngine;
 public class Player : MonoBehaviour
 {
     private HingeJoint2D _joint;
+    
     private void Start()
     {
         _joint = GetComponent<HingeJoint2D>();
