@@ -1,19 +1,17 @@
+using System;
 using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-    public static Player Instance;
-    
+    public static Player Instance { get; private set; }
+
     private HingeJoint2D _joint;
     private Rigidbody2D _rb;
 
     [SerializeField] private float _swingForce = 1f;
 
-    private void Start()
+    private void Awake()
     {
-        _joint = GetComponent<HingeJoint2D>();
-        _rb = GetComponent<Rigidbody2D>();
-
         if (Instance != null && Instance != this)
         {
             Destroy(this);
@@ -24,13 +22,19 @@ public class Player : MonoBehaviour
         }
     }
 
+    private void Start()
+    {
+        _joint = GetComponent<HingeJoint2D>();
+        _rb = GetComponent<Rigidbody2D>();
+    }
+
     private void Update()
     {
-        UnhookFromRope();
+        TryUnhookFromRope();
         SwingOnRope();
     }
     
-    private void UnhookFromRope()
+    private void TryUnhookFromRope()
     {
         if (Input.GetMouseButtonDown(0))
         {

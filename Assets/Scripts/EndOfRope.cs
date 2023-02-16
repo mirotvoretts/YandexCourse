@@ -13,12 +13,12 @@ public class EndOfRope : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (!other.CompareTag(Constants.PlayerTag)) return;
-        if (_playerJoint.enabled) return;
+        if (other.TryGetComponent<Player>(out var player) && !_playerJoint.enabled)
+        {
+            player.ResetRotation();
 
-        Player.Instance.ResetRotation();
-        
-        ChangeCouplingPoint();
+            ChangeCouplingPoint();
+        }
     }
 
     private void ChangeCouplingPoint()
