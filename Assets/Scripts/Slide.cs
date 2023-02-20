@@ -38,7 +38,7 @@ public class Slide : MonoBehaviour
     {
         var alongSurface = Vector2.Perpendicular(_groundNormal);
 
-        _targetVelocity = alongSurface * _speed;
+        _targetVelocity = alongSurface * (Vector2.Dot(alongSurface, _velocity.normalized) * _speed);
     }
 
     private void FixedUpdate()
@@ -61,7 +61,7 @@ public class Slide : MonoBehaviour
 
     private void Movement(Vector2 move, bool yMovement)
     {
-        float distance = move.magnitude;
+        var distance = move.magnitude;
 
         if (distance > MinMoveDistance)
         {
@@ -90,7 +90,7 @@ public class Slide : MonoBehaviour
                 var projection = Vector2.Dot(_velocity, currentNormal);
                 if (projection < 0)
                 {
-                    _velocity = _velocity - projection * currentNormal;
+                    _velocity -= projection * currentNormal;
                 }
 
                 var modifiedDistance = t.distance - ShellRadius;
@@ -98,6 +98,6 @@ public class Slide : MonoBehaviour
             }
         }
 
-        _rb2d.position = _rb2d.position + move.normalized * distance;
+        _rb2d.position += move.normalized * distance;
     }
 }
