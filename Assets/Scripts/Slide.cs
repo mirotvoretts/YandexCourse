@@ -9,9 +9,10 @@ public class Slide : MonoBehaviour
     [SerializeField] private Vector2 _velocity;
     [SerializeField] private LayerMask _layerMask;
     [SerializeField] private float _speed;
+    [SerializeField] private float _jumpForce;
 
     private Rigidbody2D _rb2d;
-
+    
     private Vector2 _groundNormal;
     private Vector2 _targetVelocity;
     private bool _grounded;
@@ -57,6 +58,8 @@ public class Slide : MonoBehaviour
         move = Vector2.up * deltaPosition.y;
 
         Movement(move, true);
+        
+        TryToJump();
     }
 
     private void Movement(Vector2 move, bool yMovement)
@@ -99,5 +102,31 @@ public class Slide : MonoBehaviour
         }
 
         _rb2d.position += move.normalized * distance;
+    }
+
+    private void TryToJump()
+    {
+        if (Input.GetAxis(Constants.JumpInput) > 0 && _grounded)
+        {
+            _rb2d.position += _groundNormal * _jumpForce;
+        }
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision2D)
+    {
+        GroundedUpdate(collision2D, true);
+    }
+    
+    private void OnCollisionExit2D(Collision2D collision2D)
+    {
+        GroundedUpdate(collision2D, false);
+    }
+
+    private void GroundedUpdate(Collision2D collision2D, bool value)
+    {
+        if (collision2D.gameObject.CompareTag(Constants.GroundTag))
+        {
+            _grounded = value;
+        }
     }
 }
