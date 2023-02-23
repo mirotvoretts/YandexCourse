@@ -1,9 +1,30 @@
 using UnityEngine;
 
-public class CharacterMovement : MonoBehaviour, IMover
+[RequireComponent(typeof(Rigidbody2D))]
+[RequireComponent(typeof(Slide))]
+public class CharacterMovement : MonoBehaviour
 {
-    public Vector3 Evaluate(float time)
+    [SerializeField] private float _jumpForce;
+    
+    private Rigidbody2D _rb2d;
+    private Slide _slide;
+
+    private void OnEnable()
     {
-        throw new System.NotImplementedException();
+        _rb2d = GetComponent<Rigidbody2D>();
+        _slide = GetComponent<Slide>();
+    }
+
+    private void FixedUpdate()
+    {
+        TryToJump();
+    }
+    
+    private void TryToJump()
+    {
+        if (Input.GetAxis(Constants.JumpInput) > 0 && _slide.IsGrounded)
+        {
+            _rb2d.position += _slide.GroundNormal  * _jumpForce;
+        }
     }
 }

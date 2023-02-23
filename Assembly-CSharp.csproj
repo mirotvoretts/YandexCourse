@@ -41,19 +41,17 @@
     <ImplicitlyExpandDesignTimeFacades>false</ImplicitlyExpandDesignTimeFacades>
   </PropertyGroup>
   <ItemGroup>
-     <Compile Include="Assets\Scripts\FromPracticalLesson\IMover.cs" />
-     <Compile Include="Assets\Scripts\FromPracticalLesson\FreeFall.cs" />
      <Compile Include="Assets\Scripts\CharacterMovement.cs" />
      <Compile Include="Assets\Scripts\Player.cs" />
-     <Compile Include="Assets\Scripts\FromPracticalLesson\Swing.cs" />
      <Compile Include="Assets\Scripts\Slide.cs" />
-     <Compile Include="Assets\Scripts\Constants.cs" />
+     <Compile Include="Assets\Scripts\Ground.cs" />
+     <Compile Include="Assets\Scripts\Service\Constants.cs" />
      <Compile Include="Assets\Scripts\EndOfRope.cs" />
      <Folder Include="Assets" />
      <Folder Include="Assets\Scenes" />
      <Folder Include="Assets\Sprites" />
+     <Folder Include="Assets\Scripts\Service" />
      <Folder Include="Assets\Scripts" />
-     <Folder Include="Assets\Scripts\FromPracticalLesson" />
      <Reference Include="UnityEngine">
      <HintPath>C:\Program Files\Unity\Hub\Editor\2021.3.16f1\Editor\Data\Managed\UnityEngine\UnityEngine.dll</HintPath>
      </Reference>

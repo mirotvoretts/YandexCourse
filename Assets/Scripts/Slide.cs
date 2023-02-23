@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 [RequireComponent(typeof(Rigidbody2D))]
 public class Slide : MonoBehaviour
@@ -9,19 +10,17 @@ public class Slide : MonoBehaviour
     [SerializeField] private Vector2 _velocity;
     [SerializeField] private LayerMask _layerMask;
     [SerializeField] private float _speed;
-    [SerializeField] private float _jumpForce;
 
     private Rigidbody2D _rb2d;
     
-    private Vector2 _groundNormal;
     private Vector2 _targetVelocity;
-    private bool _grounded;
+    
     private ContactFilter2D _contactFilter;
-    private RaycastHit2D[] _hitBuffer = new RaycastHit2D[16];
-    private List<RaycastHit2D> _hitBufferList = new List<RaycastHit2D>(16);
+    private readonly RaycastHit2D[] _hitBuffer = new RaycastHit2D[16];
+    private readonly List<RaycastHit2D> _hitBufferList = new(16);
 
-    private const float MinMoveDistance = 0.001f;
-    private const float ShellRadius = 0.01f;
+    public Vector2 GroundNormal { get; private set; }
+    public bool IsGrounded { get; private set; }
 
     private void OnEnable()
     {
@@ -37,7 +36,7 @@ public class Slide : MonoBehaviour
 
     private void Update()
     {
-        var alongSurface = Vector2.Perpendicular(_groundNormal);
+        var alongSurface = Vector2.Perpendicular(GroundNormal);
 
         _targetVelocity = alongSurface * (Vector2.Dot(alongSurface, _velocity.normalized) * _speed);
     }
@@ -47,28 +46,26 @@ public class Slide : MonoBehaviour
         _velocity += Physics2D.gravity * (_gravityModifier * Time.deltaTime);
         _velocity.x = _targetVelocity.x;
 
-        _grounded = false;
+        IsGrounded = false;
 
         var deltaPosition = _velocity * Time.deltaTime;
-        var moveAlongGround = new Vector2(_groundNormal.y, -_groundNormal.x);
-        var move = moveAlongGround * deltaPosition.x;
+        var moveAlongGround = new Vector2(GroundNormal.y, -GroundNormal.x);
+        var direction = moveAlongGround * deltaPosition.x;
 
-        Movement(move, false);
+        MovementLogic(direction, false);
 
-        move = Vector2.up * deltaPosition.y;
+        direction = Vector2.up * deltaPosition.y;
 
-        Movement(move, true);
-        
-        TryToJump();
+        MovementLogic(direction, true);
     }
 
-    private void Movement(Vector2 move, bool yMovement)
+    private void MovementLogic(Vector2 direction, bool yMovement)
     {
-        var distance = move.magnitude;
+        var distance = direction.magnitude;
 
-        if (distance > MinMoveDistance)
+        if (distance > Constants.MinMoveDistance)
         {
-            var count = _rb2d.Cast(move, _contactFilter, _hitBuffer, distance + ShellRadius);
+            var count = _rb2d.Cast(direction, _contactFilter, _hitBuffer, distance + Constants.ShellRadius);
 
             _hitBufferList.Clear();
 
@@ -77,15 +74,15 @@ public class Slide : MonoBehaviour
                 _hitBufferList.Add(_hitBuffer[i]);
             }
 
-            foreach (var t in _hitBufferList)
+            foreach (var hit in _hitBufferList)
             {
-                var currentNormal = t.normal;
+                var currentNormal = hit.normal;
                 if (currentNormal.y > _minGroundNormalY)
                 {
-                    _grounded = true;
+                    IsGrounded = true;
                     if (yMovement)
                     {
-                        _groundNormal = currentNormal;
+                        GroundNormal = currentNormal;
                         currentNormal.x = 0;
                     }
                 }
@@ -96,37 +93,11 @@ public class Slide : MonoBehaviour
                     _velocity -= projection * currentNormal;
                 }
 
-                var modifiedDistance = t.distance - ShellRadius;
+                var modifiedDistance = hit.distance - Constants.ShellRadius;
                 distance = modifiedDistance < distance ? modifiedDistance : distance;
             }
         }
 
-        _rb2d.position += move.normalized * distance;
-    }
-
-    private void TryToJump()
-    {
-        if (Input.GetAxis(Constants.JumpInput) > 0 && _grounded)
-        {
-            _rb2d.position += _groundNormal * _jumpForce;
-        }
-    }
-
-    private void OnCollisionEnter2D(Collision2D collision2D)
-    {
-        GroundedUpdate(collision2D, true);
-    }
-    
-    private void OnCollisionExit2D(Collision2D collision2D)
-    {
-        GroundedUpdate(collision2D, false);
-    }
-
-    private void GroundedUpdate(Collision2D collision2D, bool value)
-    {
-        if (collision2D.gameObject.CompareTag(Constants.GroundTag))
-        {
-            _grounded = value;
-        }
+        _rb2d.position += direction.normalized * distance;
     }
 }
